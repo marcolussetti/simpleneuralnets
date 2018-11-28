@@ -11,5 +11,6 @@ jsconfig.json
 
 ### Nim ###
 nimcache/
+.backup
 
 # End of https://www.gitignore.io/api/code,nim
