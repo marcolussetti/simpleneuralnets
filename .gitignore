@@ -1,0 +1,15 @@
+
+# Created by https://www.gitignore.io/api/code,nim
+# Edit at https://www.gitignore.io/?templates=code,nim
+
+### Code ###
+# Visual Studio Code - https://code.visualstudio.com/
+.settings/
+.vscode/
+tsconfig.json
+jsconfig.json
+
+### Nim ###
+nimcache/
+
+# End of https://www.gitignore.io/api/code,nim
