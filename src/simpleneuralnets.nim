@@ -3,7 +3,8 @@ import mnist_tools
 import ./utils/utils, ./utils/gaussian_random, ./utils/activations,
         ./utils/validate
 
-export maxIndex, unzip, `/`, confusionMatrix, computeAccuracy
+export maxIndex, unzip, `/`, confusionMatrix, computeAccuracy,
+        sigmoidActivation, tanhActivation
 
 type
     Neuron = tuple[
@@ -28,13 +29,15 @@ proc activation(weights: seq[float], inputs: seq[float], bias: float): float =
     for i in 0..<weights.len:
         result += weights[i] * inputs[i]
 
-proc forwardPropagationReadOnly(network: Network, input: seq[float]): seq[
+proc forwardPropagationReadOnly(network: Network, input: seq[float],
+                activationFunction = sigmoidActivation): seq[
                 float] =
     var inputs = input
     for i in 0..<network.len:
         var nextInputs = newSeq[float]()
         for j in 0..<network[i].len:
-            let activationResult = sigmoid(activation(network[i][
+            let activationResult = activationFunction(activation(
+                                        network[i][
                                         j].weights,
                     inputs,
                     network[i][j].bias))
@@ -42,15 +45,18 @@ proc forwardPropagationReadOnly(network: Network, input: seq[float]): seq[
         inputs = nextInputs
     return inputs
 
-proc forwardPropagation(network: var Network, input: seq[float]): seq[float] =
+proc forwardPropagation(network: var Network, input: seq[float],
+                activationFunction = sigmoidActivation): seq[float] =
     var inputs = input
     for i in 0..<network.len:
         var nextInputs = newSeq[float]()
         for j in 0..<network[i].len:
             let w = network[i][j].weights
             let b = network[i][j].bias
-            let sigmoidResult = sigmoid(activation(w, inputs, b))
-            network[i][j].output = sigmoidResult
+            let activationResult = activationFunction(activation(
+                                        w,
+                                        inputs, b))
+            network[i][j].output = activationResult
             nextInputs.add(network[i][j].output)
         inputs = nextInputs
     return inputs
@@ -95,7 +101,8 @@ proc sumOfSquaredErrors(expected: seq[float], obtained: seq[float]): float =
     return sum
 
 proc trainBNN*(network: var Network, trainingData: seq[seq[float]],
-    trainingLabels: seq[int], alpha: float, epochs: int) =
+    trainingLabels: seq[int], alpha: float, epochs: int,
+                    activationFunction = sigmoidActivation) =
     for epoch in 0..<epochs:
         var sumErrors = 0.0
         for i in 0..<trainingData.len:
