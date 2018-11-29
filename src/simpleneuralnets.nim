@@ -13,6 +13,14 @@ type
     Layer = seq[Neuron]
     Network* = seq[Layer]
 
+proc `$`*(network: Network): string =
+    var dims = newSeq[int]()
+    for layer in network:
+        dims.add(layer[0].weights.len)
+    dims.add(network[network.high].len)
+
+    return "Network[" & dims.join(",") & "]"
+
 proc newNeuron(prevLayerLength: int): Neuron =
     return (weights: generateNormalRandomSequence(prevLayerLength),
             bias: generateNormalRandom(), output: 0.0, delta: 0.0)
@@ -102,7 +110,7 @@ proc sumOfSquaredErrors(expected: seq[float], obtained: seq[float]): float =
 
 proc trainBNN*(network: var Network, trainingData: seq[seq[float]],
     trainingLabels: seq[int], alpha: float, epochs: int,
-                    activationFunction = sigmoidActivation) =
+                    activationFunction = sigmoidActivation, silent = false) =
     for epoch in 0..<epochs:
         var sumErrors = 0.0
         for i in 0..<trainingData.len:
@@ -115,7 +123,8 @@ proc trainBNN*(network: var Network, trainingData: seq[seq[float]],
             sumErrors += sumOfSquaredErrors(expected, outputs)
             backpropagation(network, expected)
             updateNetworkWeights(network, trainingData[i], alpha)
-        echo("Epoch: ", epoch, " Error: ", sumErrors)
+        if not silent:
+            echo("Epoch: ", epoch, " Error: ", sumErrors)
 
 proc classify*(network: Network, input: seq[float]): seq[float] =
     return forwardPropagationReadOnly(network, input)
